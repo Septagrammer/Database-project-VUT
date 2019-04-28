@@ -21,10 +21,20 @@ namespace Project
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        public enum Type
+        {
+            Rock,
+            Classic,
+            Jazz,
+            Pop,
+            Electronic
+        }
+
         public MainWindow()
         {
             InitializeComponent();
-            foreach (var genre in Enum.GetValues(typeof(Band.Type)))
+            foreach (var genre in Enum.GetValues(typeof(Type)))
             {
                 ListOfGenre.Items.Add(genre);
             }
