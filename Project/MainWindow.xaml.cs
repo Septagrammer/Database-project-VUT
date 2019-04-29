@@ -138,23 +138,30 @@ namespace Project
 
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
+            Table selected = (Table)Display.SelectedItem;
+            Table toDel = (from Table in context.Table where Table.Name == selected.Name select Table).FirstOrDefault();
+            
+            NameText.Text = "";
+            YearText.Text = "";
+            SongsText.Text = "";
+
+            if (selected == null)
+            {
+                return;
+            }
+
+            context.Table.DeleteOnSubmit(toDel);
+            context.SubmitChanges();
+
             Table edited = new Table();
             edited.Name = NameText.Text;
             edited.Year = YearText.Text;
             edited.Songs = SongsText.Text;
             edited.Genre = ListOfGenre.SelectedItem.ToString();
-            Table toEdit = (from Table in context.Table where Table.Name == edited.Name select Table).FirstOrDefault();
-            NameText.Text = "";
-            YearText.Text = "";
-            SongsText.Text = "";
-            if (toEdit == null)
-            {
-                return;
-            }
-            context.Table.DeleteOnSubmit(toEdit);
-            context.SubmitChanges();
+
             context.Table.InsertOnSubmit(edited);
             context.SubmitChanges();
+            refresh();
         }
     }
 }
