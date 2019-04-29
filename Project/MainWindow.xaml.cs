@@ -140,7 +140,13 @@ namespace Project
         {
             Table selected = (Table)Display.SelectedItem;
             Table toDel = (from Table in context.Table where Table.Name == selected.Name select Table).FirstOrDefault();
-            
+
+            Table edited = new Table();
+            edited.Name = NameText.Text;
+            edited.Year = YearText.Text;
+            edited.Songs = SongsText.Text;
+            edited.Genre = ListOfGenre.SelectedItem.ToString();
+
             NameText.Text = "";
             YearText.Text = "";
             SongsText.Text = "";
@@ -152,13 +158,6 @@ namespace Project
 
             context.Table.DeleteOnSubmit(toDel);
             context.SubmitChanges();
-
-            Table edited = new Table();
-            edited.Name = NameText.Text;
-            edited.Year = YearText.Text;
-            edited.Songs = SongsText.Text;
-            edited.Genre = ListOfGenre.SelectedItem.ToString();
-
             context.Table.InsertOnSubmit(edited);
             context.SubmitChanges();
             refresh();
