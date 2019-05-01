@@ -2,23 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Project
 {
-    /// <summary>
-    /// Логика взаимодействия для MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
 
@@ -45,6 +32,12 @@ namespace Project
 
         private void Search_Click(object sender, RoutedEventArgs e)
         {
+            if (SearchBox.Text == "")
+            {
+                MessageBox.Show("You shoud write some text to search");
+                refresh();
+                return;
+            }
             var bands = context.Table;
             List<Table> bandsRes = new List<Table>();
             foreach (var band in bands)
@@ -55,10 +48,16 @@ namespace Project
                 }
             }
             Display.ItemsSource = bandsRes;
+            SearchBox.Text = "";
         }
 
         private void New_Click(object sender, RoutedEventArgs e)
         {
+            if ((NameText.Text == "") || (YearText.Text == "") || (YearText.Text == "") || (ListOfGenre.SelectedItem.ToString() == ""))
+            {
+                MessageBox.Show("Please fill in all fields to create new entry");
+                return;
+            }
             Table band = new Table();
             band.Name = NameText.Text;
             band.Year = YearText.Text;
@@ -99,13 +98,18 @@ namespace Project
                 txt += row.Songs + ",";
                 txt += "\n";
             }
-            string folderPath = "D:\\";
-            File.WriteAllText(folderPath + "Database.txt", txt);
+            File.WriteAllText("Database.txt", txt);
+            MessageBox.Show("Database successfully exported into Database.txt");
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)
         {
-            StreamReader reader = File.OpenText("D:\\Database.txt");
+            if (!File.Exists(@"Database.txt"))
+            {
+                MessageBox.Show("There is no database to import");
+                return;
+            }
+            StreamReader reader = File.OpenText("Database.txt");
             string line = null;
             while ((line = reader.ReadLine()) != null)
             {
@@ -118,13 +122,18 @@ namespace Project
                     band.Year = parsed[1];
                     band.Genre = parsed[2];
                     band.Songs = parsed[3];
-                    context.Table.InsertOnSubmit(band);
-                    context.SubmitChanges();
-                }
 
+                    Table ifEx = (from Table in context.Table where Table.Name == band.Name select Table).FirstOrDefault();
+                    if (ifEx == null)
+                    {
+                        context.Table.InsertOnSubmit(band);
+                        context.SubmitChanges();
+                    }
+                }
             }
             this.refresh();
             reader.Close();
+            MessageBox.Show("Database was successfully imported");
         }
 
         private void Delete_Click(object sender, RoutedEventArgs e)
