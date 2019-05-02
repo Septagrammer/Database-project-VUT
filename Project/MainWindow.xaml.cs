@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 
 namespace Project
@@ -89,34 +90,31 @@ namespace Project
 
         private void Export_Click(object sender, RoutedEventArgs e)
         {
-            string txt = string.Empty;
+            var csv = new StringBuilder();
             foreach (var row in context.Table)
             {
-                txt += row.Name + ",";
-                txt += row.Year + ",";
-                txt += row.Genre + ",";
-                txt += row.Songs + ",";
-                txt += "\n";
+                var line = string.Format("{0};{1};{2};{3}", row.Name, row.Year, row.Genre, row.Songs);
+                csv.AppendLine(line);
             }
-            File.WriteAllText("Database.txt", txt);
-            MessageBox.Show("Database successfully exported into Database.txt");
+            File.WriteAllText("Database.csv", csv.ToString());
+            MessageBox.Show("Database successfully exported into Database.csv");
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)
         {
-            if (!File.Exists(@"Database.txt"))
+            if (!File.Exists(@"Database.csv"))
             {
                 MessageBox.Show("There is no database to import");
                 return;
             }
-            StreamReader reader = File.OpenText("Database.txt");
+            StreamReader reader = File.OpenText("Database.csv");
             string line = null;
             while ((line = reader.ReadLine()) != null)
             {
                 var rows = line.Split('\n');
                 foreach (string row in rows)
                 {
-                    string[] parsed = row.Split(',');
+                    string[] parsed = row.Split(';');
                     Table band = new Table();
                     band.Name = parsed[0];
                     band.Year = parsed[1];
@@ -133,7 +131,7 @@ namespace Project
             }
             this.refresh();
             reader.Close();
-            MessageBox.Show("Database was successfully imported");
+            MessageBox.Show("Database was successfully imported from Database.csv");
         }
 
         private void Delete_Click(object sender, RoutedEventArgs e)
@@ -147,6 +145,12 @@ namespace Project
 
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
+            if ((NameText.Text == "") || (YearText.Text == "") || (YearText.Text == "") || (ListOfGenre.SelectedItem.ToString() == ""))
+            {
+                MessageBox.Show("Please fill in all fields to edit entry");
+                return;
+            }
+
             Table selected = (Table)Display.SelectedItem;
             Table toDel = (from Table in context.Table where Table.Name == selected.Name select Table).FirstOrDefault();
 
